@@ -117,8 +117,8 @@ bool q_delete_mid(struct list_head *head)
         prev = slow;
         slow = slow->next;
     }
-    prev->next = slow->next;
-    free(slow);
+    list_del(slow); //prev->next = slow->next;
+    q_release_element(list_entry(slow, element_t, list)); //參考日升學長
     return true;
 }
 
