@@ -155,7 +155,7 @@ void q_reverse(struct list_head *head)
     };
     safe = head->next;
     head->next = head->prev;
-    head->prev;
+    head->prev = safe;
 }
 
 /* Reverse the nodes of the list k at a time */
@@ -165,9 +165,7 @@ void q_reverseK(struct list_head *head, int k)
 }
 
 /* Sort elements of queue in ascending/descending order */
-void q_sort(struct list_head *head, bool descend) {
-
-}
+void q_sort(struct list_head *head, bool descend) {}
 
 /* Remove every node which has a node with a strictly less value anywhere to
  * the right side of it */
@@ -182,17 +180,16 @@ int q_ascend(struct list_head *head)
 int q_descend(struct list_head *head)
 {
     // https://leetcode.com/problems/remove-nodes-from-linked-list/
-    if(!head)
+    if (!head)
         return;
     struct list_head *curr = head->prev, *prev = curr->prev;
     element_t *curr_entry = list_entry(curr, element_t, list);
     element_t *prev_entry = list_entry(prev, element_t, list);
-    while(prev != head){
-        if(strcmp(curr_entry->value,prev_entry->value)>0){
+    while (prev != head) {
+        if (strcmp(curr_entry->value, prev_entry->value) > 0) {
             list_del(prev);
             q_release_element(prev_entry);
-        }
-        else{
+        } else {
             curr = prev;
         }
     }
