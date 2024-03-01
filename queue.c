@@ -181,7 +181,7 @@ int q_descend(struct list_head *head)
 {
     // https://leetcode.com/problems/remove-nodes-from-linked-list/
     if (!head)
-        return;
+        return 0;
     struct list_head *curr = head->prev, *prev = curr->prev;
     element_t *curr_entry = list_entry(curr, element_t, list);
     element_t *prev_entry = list_entry(prev, element_t, list);
