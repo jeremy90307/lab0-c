@@ -70,7 +70,7 @@ bool q_insert_tail(struct list_head *head, char *s)
 /* Remove an element from head of queue */
 element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
 {
-    if (!head)
+    if (!head || list_empty(head))
         return NULL;
     element_t *node = list_first_entry(head, element_t, list);  //獲取第一個節點
     if (!sp && bufsize <= 0)
@@ -83,7 +83,7 @@ element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
 /* Remove an element from tail of queue */
 element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
 {
-    if (!head)
+    if (!head || list_empty(head))
         return NULL;
     element_t *node = list_last_entry(head, element_t, list);
     if (!sp && bufsize <= 0)
@@ -110,7 +110,7 @@ int q_size(struct list_head *head)
 bool q_delete_mid(struct list_head *head)
 {
     // https://leetcode.com/problems/delete-the-middle-node-of-a-linked-list/
-    if (head == NULL || head->next == NULL)
+    if (head == NULL || list_empty(head))
         return false;
     struct list_head *fast = head;
     struct list_head *slow = head;
@@ -134,10 +134,10 @@ bool q_delete_dup(struct list_head *head)
 void q_swap(struct list_head *head)
 {
     // https://leetcode.com/problems/swap-nodes-in-pairs/
-    if (!head || head->next != NULL)
+    if (!head || list_empty(head))
         return;
     struct list_head *newhead = head, *cur = newhead->next;
-    for (;cur != head, cur->next != head ;newhead = cur,cur = cur->next) {
+    for (; cur != head, cur->next != head; newhead = cur, cur = cur->next) {
         list_move(cur->next, newhead);
     }
 }
@@ -145,7 +145,7 @@ void q_swap(struct list_head *head)
 /* Reverse elements in queue */
 void q_reverse(struct list_head *head)
 {
-    if (!head || head->next == NULL)
+    if (!head || list_empty(head))
         return;
     struct list_head *node, *safe;
     list_for_each_safe (node, safe, head) {
@@ -161,7 +161,7 @@ void q_reverse(struct list_head *head)
 void q_reverseK(struct list_head *head, int k)
 {
     // https://leetcode.com/problems/reverse-nodes-in-k-group/
-    if (!head || head->next != NULL)
+    if (!head || list_empty(head))
         return;
     struct list_head *curr, *newhead = head;
     int times = k / q_size(head), j = 1;
@@ -189,7 +189,7 @@ int q_ascend(struct list_head *head)
 int q_descend(struct list_head *head)
 {
     // https://leetcode.com/problems/remove-nodes-from-linked-list/
-    if (!head)
+    if (!head || list_empty(head))
         return 0;
     struct list_head *curr = head->prev, *prev = curr->prev;
     element_t *curr_entry = list_entry(curr, element_t, list);
