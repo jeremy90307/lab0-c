@@ -119,7 +119,7 @@ bool q_delete_mid(struct list_head *head)
         slow = slow->next;
     }
     list_del(slow);  // prev->next = slow->next;
-    q_release_element(list_entry(slow, element_t, list));  //參考日升學長
+    q_release_element(list_entry(slow, element_t, list));
     return true;
 }
 
@@ -127,6 +127,23 @@ bool q_delete_mid(struct list_head *head)
 bool q_delete_dup(struct list_head *head)
 {
     // https://leetcode.com/problems/remove-duplicates-from-sorted-list-ii/
+    if (!head || list_empty(head))
+        return false;
+    int repeat;
+    element_t *entry, *safe;
+    list_for_each_entry_safe (entry, safe, head, list) {
+        if (strcmp(entry->value, safe->value) == 0 && &safe->list != head) {
+            list_del(&entry->list);
+            q_release_element(entry);
+            repeat = 1;
+        } else {
+            if (repeat == 1) {
+                list_del(&entry->list);
+                q_release_element(entry);
+            }
+            repeat = 0;
+        }
+    };
     return true;
 }
 
