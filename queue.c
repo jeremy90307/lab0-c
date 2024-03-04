@@ -96,7 +96,7 @@ element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
 int q_size(struct list_head *head)
 {
     int sum = 0;
-    if (!head || list_empty(head));
+    if (!head || list_empty(head))
         return 0;
     element_t *node;
     list_for_each_entry (node, head, list) {
