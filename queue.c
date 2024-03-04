@@ -189,6 +189,20 @@ void q_reverseK(struct list_head *head, int k)
     }
 }
 
+/*Merge the two lists in a one sorted list*/
+static struct list_head *q_merge_two(struct list_head *list1, struct list_head *list2){
+    struct list_head *head = NULL, **ptr = &head, **node;
+    element_t *list1_entry = list_entry(list1, element_t, list);
+    element_t *list2_entry = list_entry(list2, element_t, list);
+    for(struct list_head **node = NULL; list1 && list2; *node = (*node)->next){
+        node = (list1_entry->value > list2_entry->value) ? &list1 : &list2;
+        *ptr = *node;
+        ptr = &(*ptr)->next;
+    }
+    *ptr = (struct list_head *)((size_t) list1 | (size_t) list2);
+    return head;
+}
+
 /* Sort elements of queue in ascending/descending order */
 void q_sort(struct list_head *head, bool descend) {}
 
