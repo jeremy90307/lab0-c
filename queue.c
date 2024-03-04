@@ -191,7 +191,7 @@ void q_reverseK(struct list_head *head, int k)
 
 /*Merge the two lists in a one sorted list*/
  struct list_head *q_merge_two(struct list_head *list1, struct list_head *list2){
-    struct list_head *head = NULL, **ptr = &head, **node;
+    struct list_head *newhead = NULL, **ptr = &newhead, **node;
     element_t *list1_entry = list_entry(list1, element_t, list);
     element_t *list2_entry = list_entry(list2, element_t, list);
     for(struct list_head **node = NULL; list1 && list2; *node = (*node)->next){
@@ -200,11 +200,26 @@ void q_reverseK(struct list_head *head, int k)
         ptr = &(*ptr)->next;
     }
     *ptr = (struct list_head *)((size_t) list1 | (size_t) list2);
-    return head;
+    return newhead;
+}
+
+/**/
+struct list_head *mergesort(struct list_head *head){
+    if(!head || list_empty(head))
+        return NULL;
+    struct list_head *fast = head, *slow = head;
+    while(fast != NULL && fast->next != NULL){
+        fast = fast->next->next;
+        slow = slow->next;
+    } 
+    struct list_head *mid = slow;
+    return(q_merge_two(head, mid));
 }
 
 /* Sort elements of queue in ascending/descending order */
-void q_sort(struct list_head *head, bool descend) {}
+void q_sort(struct list_head *head, bool descend) {
+    
+}
 
 /* Remove every node which has a node with a strictly less value anywhere to
  * the right side of it */
