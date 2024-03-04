@@ -218,7 +218,19 @@ struct list_head *mergesort(struct list_head *head){
 
 /* Sort elements of queue in ascending/descending order */
 void q_sort(struct list_head *head, bool descend) {
-    if(head == NULL ||)
+    if(head == NULL || list_empty(head))
+        return;
+    head->prev->next = NULL;
+    head->next = mergesort(head->next);
+    struct list_head *cur = head;
+    struct list_head *next = head->next;
+    while (next) {
+        next->prev = cur;
+        cur = next;
+        next = next->next;
+    }
+    cur->next = head;
+    head->prev = cur;
 }
 
 /* Remove every node which has a node with a strictly less value anywhere to
