@@ -14,8 +14,7 @@
 /* Create an empty queue */
 struct list_head *q_new()
 {
-    struct list_head *new =
-        (struct list_head *) malloc(sizeof(struct list_head));
+    struct list_head *new = malloc(sizeof(struct list_head));
     if (!new)
         return NULL;
     INIT_LIST_HEAD(new);
@@ -97,9 +96,9 @@ element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
 int q_size(struct list_head *head)
 {
     int sum = 0;
-    if (!head)
+    if (!head || list_empty(head));
         return 0;
-    element_t *node = malloc(sizeof(element_t));
+    element_t *node;
     list_for_each_entry (node, head, list) {
         sum++;
     }
