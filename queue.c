@@ -60,10 +60,10 @@ bool q_insert_tail(struct list_head *head, char *s)
     if (!node)
         return false;
     node->value = strdup(s);
-    if (!node->value){
+    if (!node->value) {
         free(node);
         return false;
-    }    
+    }
     list_add_tail(&node->list, head);
     return true;
 }
@@ -137,7 +137,8 @@ bool q_delete_dup(struct list_head *head)
     bool flag = false;
     element_t *entry, *safe;
     list_for_each_entry_safe (entry, safe, head, list) {
-        if (entry->list.next != head && strcmp(entry->value, safe->value) == 0) {
+        if (entry->list.next != head &&
+            strcmp(entry->value, safe->value) == 0) {
             list_del(&entry->list);
             q_release_element(entry);
             flag = true;
