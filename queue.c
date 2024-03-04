@@ -190,7 +190,7 @@ void q_reverseK(struct list_head *head, int k)
 }
 
 /*Merge the two lists in a one sorted list*/
-static struct list_head *q_merge_two(struct list_head *list1, struct list_head *list2){
+ struct list_head *q_merge_two(struct list_head *list1, struct list_head *list2){
     struct list_head *head = NULL, **ptr = &head, **node;
     element_t *list1_entry = list_entry(list1, element_t, list);
     element_t *list2_entry = list_entry(list2, element_t, list);
