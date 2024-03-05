@@ -284,5 +284,16 @@ int q_descend(struct list_head *head)
 int q_merge(struct list_head *head, bool descend)
 {
     // https://leetcode.com/problems/merge-k-sorted-lists/
-    return 0;
+    if (!head || list_empty(head)) {
+        return 0;
+    }
+    struct list_head temp;
+    INIT_LIST_HEAD(&temp);
+    queue_contex_t *curr, *safe;
+    list_for_each_entry_safe (curr, safe, head, chain) {
+        list_splice_init(curr->q, &temp);
+    }
+    q_sort(&temp, false);
+    list_splice_init(&temp, list_first_entry(head, queue_contex_t, chain)->q);
+    return q_size(head);
 }
