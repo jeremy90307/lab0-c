@@ -21,6 +21,7 @@
 
 #include "dudect/fixture.h"
 #include "list.h"
+#include "list_sort.h"
 #include "random.h"
 
 /* Shannon entropy */
@@ -599,7 +600,8 @@ bool do_sort(int argc, char *argv[])
 
     set_noallocate_mode(true);
     if (current && exception_setup(true))
-        q_sort(current->q, descend);
+        use_list_sort ? list_sort(NULL, current->q, cmp)
+                      : q_sort(current->q, descend);
     exception_cancel();
     set_noallocate_mode(false);
 
@@ -1060,6 +1062,8 @@ static void console_init()
               "Number of times allow queue operations to return false", NULL);
     add_param("descend", &descend,
               "Sort and merge queue in ascending/descending order", NULL);
+    add_param("list_sort", &use_list_sort,
+              "The list_sort function used within the Linux kernel.", NULL);
 }
 
 /* Signal handlers */
@@ -1262,3 +1266,13 @@ int main(int argc, char *argv[])
 
     return !ok;
 }
+
+// Test list_sort
+// Add a comparison function.
+static int cmp(void *priv, const struct list_head *a, const struct list_head *b)
+{
+    return (list_entry(a, element_t, list)->value -
+            list_entry(b, element_t, list)->value);
+}
+// The decision whether to use `list_sort`
+static int use_list_sort = 0;
