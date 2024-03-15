@@ -16,7 +16,7 @@
 __attribute__((nonnull(2, 3, 4))) static struct list_head *
 merge(void *priv, list_cmp_func_t cmp, struct list_head *a, struct list_head *b)
 {
-    struct list_head *head, **tail = &head;
+    struct list_head *head = NULL, **tail = &head;
 
     for (;;) {
         /* if equal, take 'a' -- important for sort stability */
@@ -254,4 +254,3 @@ __attribute__((nonnull(2, 3))) void list_sort(void *priv,
     /* The final merge, rebuilding prev links */
     merge_final(priv, cmp, head, pending, list);
 }
-EXPORT_SYMBOL(list_sort);

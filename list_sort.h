@@ -20,7 +20,7 @@ __attribute__((nonnull(2, 3))) void list_sort(void *priv,
 
 typedef uint8_t u8;
 
-#define likely_notrace(x) __builtin_expect(!!(x), 1)
-#define unlikely_notrace(x) __builtin_expect(!!(x), 0)
+#define likely(x) __builtin_expect(!!(x), 1)
+#define unlikely(x) __builtin_expect(!!(x), 0)
 
 #endif

@@ -76,6 +76,9 @@ static int string_length = MAXSTRING;
 
 static int descend = 0;
 
+// The decision whether to use `list_sort`
+static int use_list_sort = 0;
+
 #define MIN_RANDSTR_LEN 5
 #define MAX_RANDSTR_LEN 10
 static const char charset[] = "abcdefghijklmnopqrstuvwxyz";
@@ -578,6 +581,13 @@ static bool do_size(int argc, char *argv[])
     q_show(3);
 
     return ok && !error_check();
+}
+
+// Add a comparison function.
+static int cmp(void *priv, const struct list_head *a, const struct list_head *b)
+{
+    return (list_entry(a, element_t, list)->value -
+            list_entry(b, element_t, list)->value);
 }
 
 bool do_sort(int argc, char *argv[])
@@ -1266,13 +1276,3 @@ int main(int argc, char *argv[])
 
     return !ok;
 }
-
-// Test list_sort
-// Add a comparison function.
-static int cmp(void *priv, const struct list_head *a, const struct list_head *b)
-{
-    return (list_entry(a, element_t, list)->value -
-            list_entry(b, element_t, list)->value);
-}
-// The decision whether to use `list_sort`
-static int use_list_sort = 0;
