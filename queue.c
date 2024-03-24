@@ -290,3 +290,29 @@ int q_merge(struct list_head *head, bool descend)
     list_splice_init(&temp, list_first_entry(head, queue_contex_t, chain)->q);
     return q_size(head);
 }
+
+/*Use the Fisher–Yates shuffle algorithm to implement shuffling*/
+void q_shuffle(struct list_head *head)
+{
+    if (!head || list_empty(head) || list_is_singular(head))
+        return;
+
+    struct list_head *last = head->prev;
+    for (int len = q_size(head); len > 0; len--) {
+        int random = rand() % len;
+        // find random node
+        struct list_head *curr = head->next;
+        while (random--)
+            curr = curr->next;
+        if (curr == last)
+            continue;
+        // swap
+        struct list_head *curr_prev = curr->prev;
+        struct list_head *last_prev = last->prev;
+        if (curr->prev != last)
+            list_move(last, curr_prev);
+        list_move(curr, last_prev);
+        last = curr->prev;
+    }
+    return;
+}
