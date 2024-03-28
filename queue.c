@@ -74,11 +74,11 @@ element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
     if (!head || list_empty(head))
         return NULL;
     element_t *node = list_first_entry(head, element_t, list);
-    if (!sp || bufsize < 1)
-        return NULL;
-    strncpy(sp, node->value, bufsize - 1);
-    sp[bufsize - 1] = 0;
     list_del(&node->list);
+    if (sp) {
+        strncpy(sp, node->value, bufsize - 1);
+        sp[bufsize - 1] = 0;
+    }
     return node;
 }
 
@@ -88,11 +88,11 @@ element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
     if (!head || list_empty(head))
         return NULL;
     element_t *node = list_last_entry(head, element_t, list);
-    if (!sp || bufsize < 1)
-        return NULL;
-    strncpy(sp, node->value, bufsize - 1);
-    sp[bufsize - 1] = 0;
     list_del(&node->list);
+    if (sp) {
+        strncpy(sp, node->value, bufsize - 1);
+        sp[bufsize - 1] = 0;
+    }
     return node;
 }
 
