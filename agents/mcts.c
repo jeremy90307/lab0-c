@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <float.h>
 #include <math.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -12,7 +13,7 @@ struct node {
     int move;
     char player;
     int n_visits;
-    double score;
+    uint64_t score;
     struct node *parent;
     struct node *children[N_GRIDS];
 };
@@ -37,23 +38,94 @@ static void free_node(struct node *node)
     free(node);
 }
 
-static inline double uct_score(int n_total, int n_visits, double score)
+static unsigned long fixed_power_int(uint64_t x,
+                                     unsigned int frac_bits,
+                                     unsigned int n)
+{
+    uint64_t result = 1ULL << frac_bits;
+
+    if (n) {
+        for (;;) {
+            if (n & 1) {
+                result *= x;
+                result += 1UL << (frac_bits - 1);
+                result >>= frac_bits;
+            }
+            n >>= 1;
+            if (!n)
+                break;
+            x *= x;
+            x += 1UL << (frac_bits - 1);
+            x >>= frac_bits;
+        }
+    }
+    return result;
+}
+
+static uint64_t fixed_log(uint64_t x)
+{
+    uint64_t fixed_x = x << FIXED_SCALING_BITS;
+
+    if (x == 0)
+        return UINT64_MAX;
+
+    if (x == 1)
+        return 0ULL;
+
+    uint64_t result = 0;
+    uint64_t num = 1;
+    for (int i = 1; i <= 16; ++i) {
+        num *= i;
+        if (i % 2 == 0) {
+            result -= fixed_power_int(fixed_x, FIXED_SCALING_BITS, i) / num;
+        } else {
+            result += fixed_power_int(fixed_x, FIXED_SCALING_BITS, i) / num;
+        }
+        fixed_x = (fixed_x * (x << FIXED_SCALING_BITS)) >> FIXED_SCALING_BITS;
+    }
+
+    return result;
+}
+
+static uint64_t fixed_sqrt(uint64_t N)
+{
+    uint64_t msb = 0ULL;
+    uint64_t n = N;
+    while (n > 1) {
+        n >>= 1;
+        msb++;
+    }
+    uint64_t a = 1ULL << msb;
+    uint64_t result = 0;
+    while (a != 0) {
+        if ((result + a) * (result + a) <= N)
+            result += a;
+        a >>= 1;
+    }
+    return result;
+}
+
+static inline uint64_t uct_score(int n_total, int n_visits, uint64_t score)
 {
     if (n_visits == 0)
-        return DBL_MAX;
-    return score / n_visits +
-           EXPLORATION_FACTOR * sqrt(log(n_total) / n_visits);
+        return UINT64_MAX;
+    uint64_t exploitation = score / n_visits;
+    uint64_t exploration =
+        EXPLORATION_FACTOR *
+        fixed_sqrt(fixed_log(n_total << FIXED_SCALING_BITS) / n_visits);
+    exploration >>= FIXED_SCALING_BITS;
+    return exploitation + exploration;
 }
 
 static struct node *select_move(struct node *node)
 {
     struct node *best_node = NULL;
-    double best_score = -1;
+    uint64_t best_score = 0ULL;
     for (int i = 0; i < N_GRIDS; i++) {
         if (!node->children[i])
             continue;
-        double score = uct_score(node->n_visits, node->children[i]->n_visits,
-                                 node->children[i]->score);
+        uint64_t score = uct_score(node->n_visits, node->children[i]->n_visits,
+                                   node->children[i]->score);
         if (score > best_score) {
             best_score = score;
             best_node = node->children[i];
@@ -62,7 +134,7 @@ static struct node *select_move(struct node *node)
     return best_node;
 }
 
-static double simulate(char *table, char player)
+static uint64_t simulate(char *table, char player)
 {
     char current_player = player;
     char temp_table[N_GRIDS];
@@ -82,12 +154,13 @@ static double simulate(char *table, char player)
         temp_table[move] = current_player;
         if ((win = check_win(temp_table)) != ' ')
             return calculate_win_value(win, player);
+        /*current_player will toggle between 'X' and 'O'*/
         current_player ^= 'O' ^ 'X';
     }
-    return 0.5;
+    return 1ULL << (FIXED_SCALING_BITS - 1);
 }
 
-static void backpropagate(struct node *node, double score)
+static void backpropagate(struct node *node, uint64_t score)
 {
     while (node) {
         node->n_visits++;
@@ -119,13 +192,13 @@ int mcts(char *table, char player)
         memcpy(temp_table, table, N_GRIDS);
         while (1) {
             if ((win = check_win(temp_table)) != ' ') {
-                double score =
+                uint64_t score =
                     calculate_win_value(win, node->player ^ 'O' ^ 'X');
                 backpropagate(node, score);
                 break;
             }
             if (node->n_visits == 0) {
-                double score = simulate(temp_table, node->player);
+                uint64_t score = simulate(temp_table, node->player);
                 backpropagate(node, score);
                 break;
             }
@@ -136,7 +209,7 @@ int mcts(char *table, char player)
             temp_table[node->move] = node->player ^ 'O' ^ 'X';
         }
     }
-    struct node *best_node = root;
+    struct node *best_node = NULL;
     int most_visits = -1;
     for (int i = 0; i < N_GRIDS; i++) {
         if (root->children[i] && root->children[i]->n_visits > most_visits) {

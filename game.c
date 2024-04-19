@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <ctype.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -62,13 +63,13 @@ char check_win(char *t)
     return 'D';
 }
 
-double calculate_win_value(char win, char player)
+uint64_t calculate_win_value(char win, char player)
 {
     if (win == player)
-        return 1.0;
+        return 1ULL << FIXED_SCALING_BITS;
     if (win == (player ^ 'O' ^ 'X'))
-        return 0.0;
-    return 0.5;
+        return 0ULL;
+    return 1ULL << (FIXED_SCALING_BITS - 1);
 }
 
 int *available_moves(const char *table)

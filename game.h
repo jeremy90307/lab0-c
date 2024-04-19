@@ -1,5 +1,5 @@
 #pragma once
-
+#include <stdint.h>
 #define BOARD_SIZE 4
 #define GOAL 3
 #define ALLOW_EXCEED 1
@@ -11,6 +11,7 @@
 #define for_each_empty_grid(i, table) \
     for (int i = 0; i < N_GRIDS; i++) \
         if (table[i] == ' ')
+#define FIXED_SCALING_BITS 12
 
 typedef struct {
     int i_shift, j_shift;
@@ -21,5 +22,5 @@ extern const line_t lines[4];
 
 int *available_moves(const char *table);
 char check_win(char *t);
-double calculate_win_value(char win, char player);
+uint64_t calculate_win_value(char win, char player);
 void draw_board(const char *t);

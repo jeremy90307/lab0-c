@@ -12,6 +12,7 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "agents/mcts.h"
 #include "agents/negamax.h"
 #include "console.h"
 #include "game.h"
@@ -498,6 +499,7 @@ static int get_input(char player)
 
 
 int ai_vs_ai = 0;
+int AI = 0;
 static bool do_ttt(int argc, char *argv[])
 {
     srand(time(NULL));
@@ -521,17 +523,18 @@ static bool do_ttt(int argc, char *argv[])
         }
 
         if (turn == ai) {
-            /*
-                        int move = mcts(table, ai);
-                        if (move != -1) {
-                            table[move] = ai;
-                            record_move(move);
-                        }
-            */
-            int move = negamax_predict(table, ai).move;
-            if (move != -1) {
-                table[move] = ai;
-                record_move(move);
+            if (AI) {
+                int move = mcts(table, ai);
+                if (move != -1) {
+                    table[move] = ai;
+                    record_move(move);
+                }
+            } else {
+                int move = negamax_predict(table, ai).move;
+                if (move != -1) {
+                    table[move] = ai;
+                    record_move(move);
+                }
             }
         } else {
             if (ai_vs_ai) {
@@ -585,7 +588,12 @@ void init_cmd()
     add_param("error", &err_limit, "Number of errors until exit", NULL);
     add_param("echo", &echo, "Do/don't echo commands", NULL);
     add_param("entropy", &show_entropy, "Show/Hide Shannon entropy", NULL);
-    add_param("ai_vs_ai", &ai_vs_ai, "ai vs_ai", NULL);
+    add_param("ai_vs_ai", &ai_vs_ai,
+              "Conducting a Tic Tac Toe showdown between AIs", NULL);
+    add_param(
+        "AI", &AI,
+        "The default AI algorithm is Negamax. To enable MCTS, set the AI to 1.",
+        NULL);
 
     init_in();
     init_time(&last_time);
