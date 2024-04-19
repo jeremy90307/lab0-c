@@ -496,6 +496,8 @@ static int get_input(char player)
     return GET_INDEX(y, x);
 }
 
+
+int ai_vs_ai = 0;
 static bool do_ttt(int argc, char *argv[])
 {
     srand(time(NULL));
@@ -504,17 +506,8 @@ static bool do_ttt(int argc, char *argv[])
     char turn = 'X';
     char ai = 'O';
 
-#ifdef USE_RL
-    rl_agent_t agent;
-    unsigned int state_num = 1;
-    CALC_STATE_NUM(state_num);
-    init_rl_agent(&agent, state_num, 'O');
-    load_model(&agent, state_num, MODEL_NAME);
-#elif defined(USE_MCTS)
-    // A routine for initializing MCTS is not required.
-#else
     negamax_init();
-#endif
+
     while (1) {
         char win = check_win(table);
         if (win == 'D') {
@@ -528,39 +521,43 @@ static bool do_ttt(int argc, char *argv[])
         }
 
         if (turn == ai) {
-#ifdef USE_RL
-            int move = play_rl(table, &agent);
-            record_move(move);
-#elif defined(USE_MCTS)
-            int move = mcts(table, ai);
-            if (move != -1) {
-                table[move] = ai;
-                record_move(move);
-            }
-#else
+            /*
+                        int move = mcts(table, ai);
+                        if (move != -1) {
+                            table[move] = ai;
+                            record_move(move);
+                        }
+            */
             int move = negamax_predict(table, ai).move;
             if (move != -1) {
                 table[move] = ai;
                 record_move(move);
             }
-#endif
         } else {
-            draw_board(table);
-            int move;
-            while (1) {
-                move = get_input(turn);
-                if (table[move] == ' ') {
-                    break;
+            if (ai_vs_ai) {
+                int move = negamax_predict(table, ai).move;
+                if (move != -1) {
+                    table[move] = turn;
+                    record_move(move);
                 }
-                printf("Invalid operation: the position has been marked\n");
+            } else {
+                draw_board(table);
+                int move;
+                while (1) {
+                    move = get_input(turn);
+                    if (table[move] == ' ') {
+                        break;
+                    }
+                    printf("Invalid operation: the position has been marked\n");
+                }
+                table[move] = turn;
+                record_move(move);
             }
-            table[move] = turn;
-            record_move(move);
         }
         turn = turn == 'X' ? 'O' : 'X';
     }
     print_moves();
-
+    move_count = 0;
     return 0;
 }
 
@@ -588,6 +585,7 @@ void init_cmd()
     add_param("error", &err_limit, "Number of errors until exit", NULL);
     add_param("echo", &echo, "Do/don't echo commands", NULL);
     add_param("entropy", &show_entropy, "Show/Hide Shannon entropy", NULL);
+    add_param("ai_vs_ai", &ai_vs_ai, "ai vs_ai", NULL);
 
     init_in();
     init_time(&last_time);
